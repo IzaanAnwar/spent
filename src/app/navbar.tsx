@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Menu, X, DollarSign } from "lucide-react";
+import { Menu, X, DollarSign, ReceiptIndianRupeeIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
@@ -26,9 +26,9 @@ export const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <DollarSign className="h-8 w-8 text-primary" />
+              <ReceiptIndianRupeeIcon className="h-8 w-8 text-primary" />
               <span className="ml-2 text-xl font-bold text-gray-800">
-                SplitSmart
+                Kharach
               </span>
             </Link>
           </div>
