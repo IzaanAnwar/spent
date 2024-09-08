@@ -17,9 +17,6 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-export const description =
-  "A login form with email and password. There's an option to login with Google and a link to sign up if you don't have an account.";
-
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");

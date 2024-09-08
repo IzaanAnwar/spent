@@ -12,13 +12,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { PlusCircle, Search, Calendar } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -30,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Expense,
   User,
@@ -38,7 +31,7 @@ import {
   useRoommatesQuery,
 } from "@/lib/queries";
 import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import {
   Dialog,
@@ -61,7 +54,9 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
   const [dateFilter, setDateFilter] = useState("");
 
   const roommates = useRoommatesQuery(params.groupId);
-  const { data: expenses = [] } = useExpensesQuery(params.groupId);
+  const { data: expenses = [], isPending: expensePending } = useExpensesQuery(
+    params.groupId,
+  );
 
   const useAddSpent = useMutation({
     mutationKey: ["addSpent"],
@@ -154,7 +149,13 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
   const totals = calculateTotals(expenses);
   const balances = calculateBalances(totals);
 
-  console.log({ sharedBy });
+  if (roommates.isPending || expensePending) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex justify-center items-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="container mx-auto p-4 space-y-8">
@@ -162,7 +163,9 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
           <h1 className="text-3xl font-bold">Expense Logs</h1>
           <Dialog>
             <DialogTrigger asChild>
-              <Button>Log New Expense</Button>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" /> Log New Expense
+              </Button>
             </DialogTrigger>
             <DialogContent className="w-full bg-white bg-opacity-100">
               <DialogHeader>

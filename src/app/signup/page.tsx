@@ -25,9 +25,6 @@ import {
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
 
-export const description =
-  "A sign up form with first name, last name, email and password inside a card. There's an option to sign up with GitHub and a link to login if you already have an account";
-
 export default function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -97,7 +94,9 @@ export default function SignupForm() {
                 </SelectTrigger>
                 <SelectContent>
                   {allGroups.data?.map((gr) => (
-                    <SelectItem value={gr?.id}>{gr?.name}</SelectItem>
+                    <SelectItem value={gr?.id} key={gr?.id}>
+                      {gr?.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

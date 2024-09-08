@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
