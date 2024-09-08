@@ -49,8 +49,8 @@ export default function LoginForm() {
   });
   useEffect(() => {
     async function isLoggedIn() {
-      const user = await supabase.auth.getUser();
-      if (user) {
+      const res = await supabase.auth.getUser();
+      if (res.data.user) {
         router.push("/dashboard");
       }
     }
