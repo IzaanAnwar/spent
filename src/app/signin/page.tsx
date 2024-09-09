@@ -42,6 +42,7 @@ export default function LoginForm() {
     },
     onSuccess: () => {
       toast.success("Login successful");
+      router.push("/dashboard");
     },
   });
   useEffect(() => {

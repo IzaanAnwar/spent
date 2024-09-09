@@ -62,6 +62,15 @@ export default function Dashboard() {
   const useRemoveGroup = useMutation({
     mutationKey: ["removeGroup"],
     mutationFn: async (groupId: string) => {
+      const { error: sessionError, data: session } =
+        await supabase.auth.getUser();
+      if (sessionError) {
+        throw sessionError;
+      }
+      if (session.user.email !== process.env.ADMIN_EMAIL) {
+        throw new Error("Only the admin can delete a group");
+      }
+
       const res = await supabase.from("groups").delete().eq("id", groupId);
       if (res.error) {
         throw res.error;

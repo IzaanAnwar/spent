@@ -72,7 +72,7 @@ export default function SignupForm() {
       toast.error(err.message);
     },
     onSuccess: () => {
-      toast.success("Account created successfully");
+      toast.success("We have sent you an email to verify your account");
     },
   });
 

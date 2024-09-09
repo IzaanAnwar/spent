@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Menu, X, DollarSign, ReceiptIndianRupeeIcon } from "lucide-react";
+import { Menu, X, ReceiptIndianRupeeIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
@@ -77,18 +77,13 @@ export const Navbar = () => {
             >
               {isApp ? "Dashboard" : "Features"}
             </Link>
-            <Link
-              href={isApp ? "/expenses" : "/#pricing"}
-              className="text-gray-500 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
-            >
-              {isApp ? "Expenses" : "Pricing"}
-            </Link>
+
             {!isApp && (
               <Link
-                href="/login"
+                href="/signin"
                 className="text-gray-500 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
               >
-                Login
+                Sign in
               </Link>
             )}
           </div>

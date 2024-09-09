@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Spent",
-  description: "So, How much did you spend on stuff today?",
+  title: "Kharach",
+  description: "Split Expenses, Not Friendships",
 };
 
 export default function RootLayout({

@@ -43,6 +43,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import moment from "moment";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard({ params }: { params: { groupId: string } }) {
   console.log({ params });
@@ -54,9 +55,11 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
   const [dateFilter, setDateFilter] = useState("");
 
   const roommates = useRoommatesQuery(params.groupId);
-  const { data: expenses = [], isPending: expensePending } = useExpensesQuery(
-    params.groupId,
-  );
+  const {
+    data: expenses = [],
+    isPending: expensePending,
+    refetch: refetchExpenses,
+  } = useExpensesQuery(params.groupId);
 
   const useAddSpent = useMutation({
     mutationKey: ["addSpent"],
@@ -86,6 +89,7 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
     },
     onSuccess: () => {
       toast.success("Expense logged successfully");
+      refetchExpenses();
     },
   });
 
@@ -288,37 +292,94 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
 
 function ExpenseList({ expenses }: { expenses: Expense[] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Expense List</CardTitle>
+    <Card className="bg-white dark:bg-gray-800">
+      <CardHeader className="bg-gray-50 dark:bg-gray-900">
+        <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Expense List
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Paid By</TableHead>
-              <TableHead>Shared By</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {expenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell className="font-medium">
-                  {moment(expense.created_at).format("DD MMM YYYY")}
-                </TableCell>
-                <TableCell>{expense.description}</TableCell>
-                <TableCell>₹{expense.amount.toFixed(2)}</TableCell>
-                <TableCell>{expense.paid_by?.full_name}</TableCell>
-                <TableCell>
-                  {expense.shared_by.map((user) => user?.full_name).join(", ")}
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="hidden md:table-header-group">
+              <TableRow className="bg-gray-100 dark:bg-gray-700">
+                <TableHead className="w-[100px] font-semibold text-gray-600 dark:text-gray-300">
+                  Date
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Description
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Amount
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Paid By
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Shared By
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {expenses.map((expense, index) => (
+                <TableRow
+                  key={expense.id}
+                  className={`flex flex-col md:table-row border-y border-y-gray-300 dark:border-y-gray-700 ${
+                    index % 2 === 0
+                      ? "bg-gray-50 dark:bg-gray-800"
+                      : "bg-white dark:bg-gray-900"
+                  }`}
+                >
+                  <TableCell className="md:w-[100px] py-4">
+                    <span className="md:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Date:
+                    </span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {moment(expense.created_at).format("DD MMM YYYY")}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span className="md:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Description:
+                    </span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {expense.description}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span className="md:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Amount:
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="font-semibold text-green-600 dark:text-green-400 border-green-600 dark:border-green-400"
+                    >
+                      ₹{expense.amount.toFixed(2)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span className="md:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Paid By:
+                    </span>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {expense.paid_by?.full_name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span className="md:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Shared By:
+                    </span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {expense.shared_by
+                        .map((user) => user?.full_name)
+                        .join(", ")}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
