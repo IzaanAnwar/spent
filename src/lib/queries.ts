@@ -16,6 +16,24 @@ export const useGroupsQuery = () => {
   });
 };
 
+export const useSubGroupsQuery = (group_id: string) => {
+  return useQuery({
+    queryKey: ["sub_groups"],
+    queryFn: async () => {
+      const subGroups = await supabase
+        .from("sub_groups")
+        .select("*")
+        .eq("group_id", group_id);
+      console.log({ subGroups });
+      if (subGroups.error) {
+        throw subGroups.error;
+      }
+      return subGroups.data;
+    },
+    enabled: true,
+  });
+};
+
 export type User = {
   id: string;
   full_name: string;
@@ -65,14 +83,57 @@ export const useExpensesQuery = (groupId: string) => {
             created_at 
             `,
         )
-        .eq("group_id", groupId);
+        .eq("sub_group_id", groupId);
 
       if (expenses.error) {
         throw expenses.error;
       }
-      console.log({ expenses: expenses.data });
 
       return expenses.data as unknown as Expense[];
+    },
+    enabled: true,
+  });
+};
+
+export const useSession = () => {
+  return useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: session, error } = await supabase.auth.getSession();
+      if (error) {
+        throw error;
+      }
+      return session;
+    },
+    enabled: true,
+  });
+};
+
+export interface DueGroup {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export const useDueGroupsQuery = (
+  groupId: string,
+  ownerId: string | undefined,
+) => {
+  return useQuery<DueGroup[]>({
+    queryKey: ["due_groups"],
+    queryFn: async () => {
+      const dueGroups = await supabase
+        .from("due_groups")
+        .select("*")
+        .eq("group_id", groupId)
+        .eq("owner", ownerId);
+      if (dueGroups.error) {
+        throw dueGroups.error;
+      }
+      if (!dueGroups.data || dueGroups.data?.length === 0) {
+        return [];
+      }
+      return dueGroups.data;
     },
     enabled: true,
   });

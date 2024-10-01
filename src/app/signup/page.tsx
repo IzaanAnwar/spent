@@ -59,6 +59,7 @@ export default function SignupForm() {
         throw res.error;
       }
       const pgRes = await supabase.from("users").insert({
+        id: res.data.user?.id,
         email,
         full_name: fullName,
         group_id: groupId,
