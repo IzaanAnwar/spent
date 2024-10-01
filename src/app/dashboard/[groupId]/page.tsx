@@ -59,8 +59,10 @@ import {
 import moment from "moment";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard({ params }: { params: { groupId: string } }) {
+  const router = useRouter();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState("");
@@ -132,8 +134,19 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto space-y-8">
+    <div className="min-h-screen bg-background px-4 py-8 space-y-4 md:px-8 lg:px-44">
+      <div className="mb-6 flex items-center justify-between">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+      <div className=" mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Expense Logs</h1>
           <Dialog>

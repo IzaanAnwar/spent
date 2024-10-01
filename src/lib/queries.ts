@@ -113,6 +113,7 @@ export interface DueGroup {
   id: string;
   name: string;
   description: string;
+  owner: string;
 }
 
 export const useDueGroupsQuery = (

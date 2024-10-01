@@ -2,7 +2,6 @@
 
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -39,6 +38,7 @@ export default function Dashboard() {
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [selectedGroup, setSelectedGroup] = useState<string>("");
+  const [selectedDueGroup, setSelectedDueGroup] = useState<string>("");
   const [dueName, setDueName] = useState("");
   const [dueDescription, setDueDescription] = useState("");
   const session = useSession();
@@ -107,6 +107,31 @@ export default function Dashboard() {
     },
   });
 
+  const useRemoveDueGroup = useMutation({
+    mutationKey: ["removeDueGroup"],
+    mutationFn: async (groupId: string) => {
+      const dueGr = dueGroups.data?.find((gr) => gr.id === groupId);
+      if (!dueGr) {
+        throw new Error("Group not found");
+      }
+      if (dueGr.owner !== session.data?.session?.user.id) {
+        throw new Error("You are not the owner of this due group");
+      }
+      const res = await supabase.from("due_groups").delete().eq("id", groupId);
+      if (res.error) {
+        throw res.error;
+      }
+      return res.data;
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      toast.success("Due Group deleted successfully");
+      dueGroups.refetch();
+    },
+  });
+
   const useNewDueGroup = useMutation({
     mutationKey: ["newDueGroup"],
     mutationFn: async () => {
@@ -158,7 +183,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="min-h-screen p-4 space-y-4">
+      <div className="min-h-screen px-4 py-8 space-y-4 md:px-8 lg:px-44">
         <h1 className="text-3xl font-bold ">
           Here are all the expense groups you are in
         </h1>
@@ -259,44 +284,58 @@ export default function Dashboard() {
         <h2 className="text-2xl font-bold mt-8">Expense Groups</h2>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {groups.data?.map((group) => (
-            <Link href={`/dashboard/${group.id}`} key={group.id}>
-              <Card className="w-full relative hover:shadow-md">
-                <span className="absolute top-4 right-4">
-                  <Button
-                    variant={"destructive"}
-                    size={"icon"}
-                    onClick={() => {
-                      setSelectedGroup(group.id);
-                      useRemoveGroup.mutate(group.id);
-                    }}
-                    disabled={
-                      useRemoveGroup.isPending && selectedGroup === group.id
-                    }
-                  >
-                    <TrashIcon size={20} />
-                  </Button>
-                </span>
-                <CardHeader>
+            <Card key={group.id} className="w-full relative hover:shadow-md">
+              <span className="absolute top-4 right-4">
+                <Button
+                  variant={"destructive"}
+                  size={"icon"}
+                  onClick={() => {
+                    setSelectedGroup(group.id);
+                    useRemoveGroup.mutate(group.id);
+                  }}
+                  isPending={
+                    useRemoveGroup.isPending && selectedGroup === group.id
+                  }
+                >
+                  <TrashIcon size={20} />
+                </Button>
+              </span>
+              <CardHeader>
+                <Link href={`/dashboard/${group.id}`}>
                   <CardTitle>{group.name}</CardTitle>
                   <CardDescription>{group.description}</CardDescription>
-                </CardHeader>
-                <CardContent></CardContent>
-              </Card>
-            </Link>
+                </Link>
+              </CardHeader>
+            </Card>
           ))}
         </div>
 
         <h2 className="text-2xl font-bold mt-8">Due Groups</h2>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {dueGroups.data?.map((dueGroup) => (
-            <Link href={`/dashboard/dues/${dueGroup.id}`} key={dueGroup.id}>
-              <Card key={dueGroup.id} className="w-full hover:shadow-md">
-                <CardHeader>
+            <Card key={dueGroup.id} className="w-full hover:shadow-md relative">
+              <span className="absolute top-4 right-4">
+                <Button
+                  variant={"destructive"}
+                  size={"icon"}
+                  onClick={() => {
+                    setSelectedDueGroup(dueGroup.id);
+                    useRemoveDueGroup.mutate(dueGroup.id);
+                  }}
+                  isPending={
+                    useRemoveGroup.isPending && selectedDueGroup === dueGroup.id
+                  }
+                >
+                  <TrashIcon size={20} />
+                </Button>
+              </span>
+              <CardHeader>
+                <Link href={`/dashboard/dues/${dueGroup.id}`} key={dueGroup.id}>
                   <CardTitle>{dueGroup.name}</CardTitle>
                   <CardDescription>{dueGroup.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
+                </Link>
+              </CardHeader>
+            </Card>
           ))}
         </div>
       </div>
