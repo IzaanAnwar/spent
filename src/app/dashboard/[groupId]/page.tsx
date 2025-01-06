@@ -16,16 +16,11 @@ import {
   ChevronRight,
   ChevronUp,
   Loader2,
+  TrashIcon,
 } from "lucide-react";
 import { PlusCircle, Search, Calendar } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -85,12 +80,10 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
     mutationKey: ["addSpent"],
     mutationFn: async () => {
       if (!description || !amount || !paidBy) {
-        toast.error("Please fill all fields");
-        return;
+        throw new Error("Please fill all fields");
       }
       if (!sharedBy.length) {
-        toast.error("Please select at least one roommate");
-        return;
+        throw new Error("Please select at least one roommate");
       }
       const res = await supabase.from("spent").insert({
         description,
@@ -98,6 +91,7 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
         paid_by: paidBy,
         shared_by: sharedBy,
         sub_group_id: params.groupId,
+        logged_by: sessionQuery.data?.session?.user.id,
       });
       if (res.error) {
         throw res.error;
@@ -193,11 +187,13 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
                         <SelectValue placeholder="Select a roommate" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roommates.data?.map((roommate) => (
-                          <SelectItem key={roommate.id} value={roommate.id}>
-                            {roommate.full_name}
-                          </SelectItem>
-                        ))}
+                        <>
+                          {roommates.data?.map((roommate) => (
+                            <SelectItem key={roommate.id} value={roommate.id}>
+                              {roommate.full_name}
+                            </SelectItem>
+                          ))}
+                        </>
                       </SelectContent>
                     </Select>
                   </div>
@@ -273,6 +269,7 @@ export default function Dashboard({ params }: { params: { groupId: string } }) {
           expenses={filteredExpenses}
           rowsPerPage={parseInt(rowsPerPage)}
           setRowsPerPage={setRowsPerPage}
+          refetch={refetchExpenses}
         />
         <ExpenseSummary expenses={expenses} users={roommates.data} />
       </div>
@@ -284,13 +281,43 @@ function ExpenseList({
   expenses,
   rowsPerPage,
   setRowsPerPage,
+  refetch,
 }: {
   expenses: Expense[];
   rowsPerPage: number;
   setRowsPerPage: (value: string) => void;
+  refetch: () => void;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const useDeleteEpense = useMutation({
+    mutationKey: ["delete-expense"],
+    mutationFn: async (id: number) => {
+      const { error: sessionError, data: session } =
+        await supabase.auth.getUser();
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+        throw new Error("Only the admin can delete a log");
+      }
+
+      const { error } = await supabase.from("spent").delete().eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+      return { message: "Log removed" };
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message ?? "Something went wrong");
+    },
+  });
   const indexOfLastExpense = currentPage * rowsPerPage;
   const indexOfFirstExpense = indexOfLastExpense - rowsPerPage;
   const currentExpenses = expenses.slice(
@@ -334,6 +361,12 @@ function ExpenseList({
                 </TableHead>
                 <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
                   Shared By
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Logged By
+                </TableHead>
+                <TableHead className="font-semibold text-gray-600 dark:text-gray-300">
+                  Action
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -391,6 +424,27 @@ function ExpenseList({
                         .map((user) => user?.full_name)
                         .join(", ")}
                     </span>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span className="sm:hidden font-bold text-gray-600 dark:text-gray-300 mr-2">
+                      Logged By:
+                    </span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {expense.logged_by?.full_name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <Button
+                      variant={"destructive"}
+                      size={"icon"}
+                      isPending={useDeleteEpense.isPending}
+                      disabled={useDeleteEpense.isPending}
+                      onClick={() => {
+                        useDeleteEpense.mutate(expense.id);
+                      }}
+                    >
+                      <TrashIcon size={20} />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

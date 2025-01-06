@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export const Navbar = () => {
-  const [isApp, setIsApp] = useState(false);
+  const [isApp, setIsApp] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   useEffect(() => {
@@ -15,6 +15,8 @@ export const Navbar = () => {
       const session = await supabase.auth.getUser();
       if (session.data.user) {
         setIsApp(true);
+      } else {
+        false;
       }
     }
     isLoggedIn();
@@ -44,6 +46,7 @@ export const Navbar = () => {
                 variant={"destructive"}
                 onClick={async () => {
                   await supabase.auth.signOut();
+                  setIsApp(false);
                   router.push("/");
                 }}
               >

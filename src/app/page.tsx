@@ -2,11 +2,10 @@
 import { motion } from "framer-motion";
 import { IndianRupee, Users, PieChart } from "lucide-react";
 import Link from "next/link";
-import { Navbar } from "./navbar";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-purple-50 to-pink-100">
+    <div className="min-h-screen ">
       <main>
         <section className="relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -39,7 +38,6 @@ export default function LandingPage() {
               </div>
             </motion.div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent"></div>
         </section>
 
         <section id="features" className="py-12 bg-white">

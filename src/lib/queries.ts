@@ -64,6 +64,7 @@ export type Expense = {
   amount: number;
   paid_by: { full_name: string; id: string };
   shared_by: User[];
+  logged_by: { id: string; full_name: string } | null;
   created_at: string;
 };
 export const useExpensesQuery = (groupId: string) => {
@@ -78,9 +79,10 @@ export const useExpensesQuery = (groupId: string) => {
             id,
             description,
             amount,
-            paid_by: users(id, full_name),
+            paid_by: users!spent_paid_by_fkey(id, full_name),            
             shared_by,
-            created_at 
+            created_at,
+            logged_by: users!spent_logged_by_fkey(id, full_name)           
             `,
         )
         .eq("sub_group_id", groupId);
